@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Org Chatbot – Sign in / Sign up</title>
+  <style>
+    :root {
+      /* Strict 3‑colour palette + accent fade */
+      --clr-primary: #e00000;       /* sharp red */
+      --clr-primary-dull: #b60000;  /* slightly duller red */
+      --clr-surface: #ffffff;       /* white */
+      --clr-on-surface: #000000;    /* black */
+
+      /* Elevations */
+      --elev-1: 0 6px 18px rgba(0, 0, 0, 0.22);
+      --elev-2: 0 12px 32px rgba(0, 0, 0, 0.3);
+
+      /* Radii – future‑looking */
+      --radius-xl: 1.5rem;
+      --radius-m: 0.875rem;
+    }
+
+    /* RESET */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .header {
+  display: flex;
+  align-items: center;
+}
+
+.header img:first-child {
+  margin-right: 45px; /* More space before the h1 */
+}
+
+.header h1 {
+  font-size: 2em;
+  background: linear-gradient(to right, black, red);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text; /* Firefox support */
+  color: transparent;
+  margin: 0;
+}
+
+.header img:last-child {
+  margin-left: 5px; /* Less space after the h1 */
+}
+
+
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--clr-surface);
+      color: var(--clr-on-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, label, button, input { font-weight: 700; }
+    a { color: var(--clr-primary); font-weight: 700; text-decoration: none; }
+
+    /* CARD */
+    .card {
+      background: var(--clr-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--elev-1);
+      padding: clamp(2rem, 4vw, 3rem);
+      width: min(400px, 90%);
+    }
+
+    /* FORM CONTROLS */
+    label { display: block; margin-top: 1.25rem; }
+    input {
+      width: 100%;
+      padding: 1rem;
+      margin-top: 0.875rem;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: var(--radius-m);
+      font-size: 1rem;
+      transition: border 0.15s ease;
+    }
+    input:focus { border-color: var(--clr-primary); }
+
+    /* BUTTON */
+    .btn {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      width: 100%;
+      padding: 1rem;
+      margin-top: 1.75rem;
+      border-radius: var(--radius-m);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--clr-surface);
+      background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-primary-dull) 100%);
+      box-shadow: var(--elev-2);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .btn:hover { transform: translateY(-3px); }
+
+    /* PASSWORD STRENGTH */
+    #strength {
+      height: 0.5rem;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.08);
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    #strength > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: var(--clr-primary);
+      transition: width 0.25s ease;
+    }
+
+    /* FOOTER TOGGLE */
+    #toggle-auth { margin-top: 1rem; text-align: center; font-size: 0.9rem; }
+
+    /* RESPONSIVE */
+    @media (max-width: 450px) { .card { padding: 1.5rem; } }
+  </style>
+</head>
+<body>
+  <div class="card" id="authCard" role="region" aria-labelledby="formTitle">
+        <div class="header">
+            <img src="img/AMREF.png" alt="amref" width="100" height="80">
+            <h1>ASM AI</h1>
+            <img src="img/ai-.png" alt="ai" width="40" height="40">
+        </div>
+    <h2 id="formTitle">Welcome Back</h2>
+
+    <!-- LOGIN -->
+    <form id="loginForm">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" required placeholder="@amref.org" />
+
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" type="password" required placeholder="••••••••" />
+
+      <button class="btn">Log In</button>
+    </form>
+
+    <!-- SIGN‑UP -->
+    <form id="signupForm" style="display:none;">
+      <label for="signupName">Full Name</label>
+      <input id="signupName" type="text" required placeholder="Firstname.Lastname" />
+
+      <label for="signupEmail">Email</label>
+      <input id="signupEmail" type="email" required placeholder="@amref.org" />
+
+      <label for="signupPassword">Password</label>
+      <input id="signupPassword" type="password" required placeholder="Create password" />
+      <div id="strength" aria-hidden="true"><span></span></div>
+
+      <button class="btn">Create Account</button>
+    </form>
+
+    <div id="toggle-auth">
+      <span>Don’t have an account? <a href="#" id="switchLink">Sign up</a></span>
+    </div>
+  </div>
+
+  <script>
+    /* MODE SWITCHING */
+    const loginForm  = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const formTitle  = document.getElementById('formTitle');
+    const switchLink = document.getElementById('switchLink');
+
+    switchLink.addEventListener('click', (evt) => {
+      evt.preventDefault();
+      const loginShowing = loginForm.style.display !== 'none';
+      loginForm.style.display  = loginShowing ? 'none' : 'block';
+      signupForm.style.display = loginShowing ? 'block' : 'none';
+      formTitle.textContent    = loginShowing ? 'Create Account' : 'Welcome Back';
+      switchLink.textContent   = loginShowing ? 'Log in' : 'Sign up';
+      switchLink.parentElement.firstChild.textContent = loginShowing ? 'Already have an account? ' : 'Don’t have an account? ';
+    });
+
+    /* PASSWORD STRENGTH */
+    const pwd   = document.getElementById('signupPassword');
+    const bar   = document.querySelector('#strength span');
+    pwd?.addEventListener('input', (e) => {
+      const v = e.target.value;
+      const length  = v.length >= 8;
+      const upper   = /[A-Z]/.test(v);
+      const lower   = /[a-z]/.test(v);
+      const number  = /[0-9]/.test(v);
+      const special = /[^A-Za-z0-9]/.test(v);
+      const score   = [length, upper, lower, number, special].filter(Boolean).length;
+      bar.style.width = (score * 20) + '%';
+    });
+
+    /* SIMPLE DEMO AUTH – REPLACE WITH REAL BACK‑END */
+    function gotoDashboard() {
+      localStorage.setItem('chatbot_user', '1');
+      window.location.href = 'ASMdashboard.html';
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // basic non‑empty validation only
+      if (loginForm.loginEmail.value && loginForm.loginPassword.value) gotoDashboard();
+    });
+
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const strong = bar.style.width === '100%';
+      if (strong) {
+        gotoDashboard();
+      } else {
+        alert('Password not strong enough (≥8 chars inc. upper, lower, number & special).');
+      }
+    });
+  </script>
+</body>
+</html>

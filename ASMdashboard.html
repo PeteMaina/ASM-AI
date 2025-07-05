@@ -1,0 +1,270 @@
+<!-- ======================= CHAT DASHBOARD PAGE (NEXT‑GEN) ======================= -->
+<!-- Filename: dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OrgBot • Dashboard</title>
+  <style>
+    /*****************************************************************
+     *  ROOT TOKENS (Material 3 Expressive – 3‑color palette)        *
+     *****************************************************************/
+    :root {
+      /* Colors */
+      --red-main:  #ff0000; /* sharp red */
+      --red-soft:  #cc0000; /* slightly duller red */
+      --white:     #ffffff; /* pure white */
+      --black:     #000000; /* pure black */
+
+      /* Typography + Elevation */
+      --font-weight: 600; /* bold Apple‑like */
+      --radius: 24px;     /* futurist curvature */
+      --shadow-1: 0 8px 24px rgba(0,0,0,.5);
+      --shadow-2: 0 12px 32px rgba(0,0,0,.6);
+
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /*****************************************************************
+     *  GLOBAL RESET                                                *
+     *****************************************************************/
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{height:100%;margin:0;padding:0;background:var(--black);color:var(--white);font-weight:var(--font-weight);}
+    button,input{font-weight:var(--font-weight);font-family:inherit;}
+    ul{list-style:none;margin:0;padding:0;}
+
+    /*****************************************************************
+     *  LAYOUT                                                      *
+     *****************************************************************/
+     .header {
+  display: flex;
+  align-items: center;
+}
+
+.header img:first-child {
+  margin-right: 45px; /* More space before the h1 */
+}
+
+.header h1 {
+  font-size: 2em;
+  background: linear-gradient(to right, black, red);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text; /* Firefox support */
+  color: transparent;
+  margin: 0;
+}
+
+.header img:last-child {
+  margin-left: 5px; /* Less space after the h1 */
+}
+
+    body{display:flex;overflow:hidden;}
+
+    /* ---------- Sidebar (Conversation list) ---------- */
+    .sidebar{width:300px;max-width:80vw;background:var(--black);border-right:2px solid var(--red-soft);display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);z-index:5;box-shadow:var(--shadow-1);} 
+    .sidebar.hidden{transform:translateX(-100%);} /* off‑canvas state */
+
+    .sidebar-header{display:flex;flex-direction:column;gap:.75rem;padding:1rem 1rem 0;}
+    .sidebar h2{margin:0;color:var(--white);font-size:1.1rem;text-align:center;}
+    #searchBar{padding:.65rem 1rem;border-radius:var(--radius);border:2px solid var(--red-main);background:var(--white);color:var(--black);box-shadow:var(--shadow-1);} 
+    #newChatBtn{margin-top:.75rem;padding:.6rem 1rem;border:none;border-radius:var(--radius);cursor:pointer;background:linear-gradient(90deg,var(--red-main),var(--red-soft));color:var(--white);box-shadow:var(--shadow-1);} 
+
+    .chat-list{flex:1;overflow-y:auto;padding:1rem 1rem 2rem;display:flex;flex-direction:column;gap:.5rem;}
+    .chat-list li{background:var(--white);color:var(--black);padding:.8rem 1rem;border-radius:var(--radius);cursor:pointer;box-shadow:var(--shadow-1);display:flex;flex-direction:column;gap:.3rem;transition:background .25s ease;}
+    .chat-list li.active{background:var(--red-main);color:var(--white);} 
+    .chat-preview{font-size:.9rem;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}
+    .chat-date{font-size:.75rem;opacity:.75;}
+
+    /* ---------- Main area ---------- */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+    /* Header */
+    header{display:flex;align-items:center;gap:1rem;padding:1rem;background:linear-gradient(90deg,var(--white),var(--red-soft));box-shadow:var(--shadow-1);} 
+    .burger{width:40px;height:32px;display:flex;flex-direction:column;justify-content:space-between;border:none;background:transparent;cursor:pointer;} 
+    .burger span{display:block;height:4px;background:var(--black);border-radius:2px;box-shadow:var(--shadow-1);transition:transform .3s ease;} 
+    .title{flex:1;text-align:center;font-size:1.25rem;font-weight:bold;color:var(--white);} 
+
+    /* Chat container */
+    .chat-container{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1.25rem;}
+    .msg{max-width:70%;padding:1rem 1.25rem;border-radius:var(--radius);box-shadow:var(--shadow-1);line-height:1.5;position:relative;} 
+    .msg.user{align-self:flex-end;background:var(--red-main);color:var(--white);} 
+    .msg.bot{align-self:flex-start;background:var(--white);color:var(--black);} 
+    .msg .timestamp{position:absolute;font-size:.7rem;opacity:.7;bottom:-1.25rem;right:.5rem;white-space:nowrap;}
+
+    /* Composer */
+    .composer{display:flex;gap:.75rem;padding:1rem;background:var(--black);border-top:2px solid var(--red-soft);} 
+    #prompt{flex:1;padding:.85rem 1rem;border-radius:var(--radius);border:2px solid var(--red-main);background:var(--white);color:var(--black);} 
+    .send-btn{flex-shrink:0;padding:.85rem 1.5rem;border:none;border-radius:var(--radius);background:linear-gradient(90deg,var(--red-main),var(--red-soft));color:var(--white);cursor:pointer;box-shadow:var(--shadow-1);} 
+
+    /* Typing indicator animation */
+    @keyframes blink{0%,100%{opacity:0;}50%{opacity:1;}}
+    .typing span{width:8px;height:8px;background:var(--black);display:inline-block;border-radius:50%;margin:0 1px;animation:blink 1s infinite;} 
+
+    /*****************************************************************
+     *  RESPONSIVE                                                  *
+     *****************************************************************/
+    @media(max-width:768px){
+      .sidebar{position:fixed;height:100%;top:0;left:0;} /* off‑canvas */
+      .burger{display:flex;}
+      .msg{max-width:85%;}
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar hidden" id="sidebar">
+    <div class="sidebar-header">
+      <h2 >CONVERSATIONS</h2>
+      <input id="searchBar" type="text" placeholder="Search chats…" />
+      <button id="newChatBtn">+ New Chat</button>
+    </div>
+    <ul id="sessionList" class="chat-list"></ul>
+  </nav>
+
+  <!-- ===== MAIN PANEL ===== -->
+  <main class="main">
+    <header>
+      <button class="burger" id="burger" aria-label="Toggle sidebar">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="header">
+            <img src="img/AMREF.png" alt="amref" width="100" height="80">
+            <h1>ASM AI</h1>
+            <img src="img/ai-.png" alt="ai" width="40" height="40">
+        </div>
+    </header>
+
+    <section id="messages" class="chat-container"></section>
+
+    <form id="composer" class="composer" autocomplete="off">
+      <input type="text" id="prompt" placeholder="Ask anything about the organization…" required />
+      <button class="send-btn" type="submit">Send</button>
+    </form>
+  </main>
+
+  <script>
+    /*****************************************************************
+     *  UTILITIES                                                   *
+     *****************************************************************/
+    const $ = (sel)=>document.querySelector(sel);
+    const $$ = (sel)=>document.querySelectorAll(sel);
+    const store = {
+      read:  (k,def)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(def)),
+      write: (k,v)=>localStorage.setItem(k,JSON.stringify(v))
+    };
+    const formatTime = (date)=>date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+    /*****************************************************************
+     *  STATE                                                       *
+     *****************************************************************/
+    let conversations = store.read('conversations',{});
+    let sessionId     = localStorage.getItem('sessionId')||Date.now().toString();
+    if(!conversations[sessionId]) conversations[sessionId]=[];
+    store.write('conversations',conversations);
+    localStorage.setItem('sessionId',sessionId);
+
+    /*****************************************************************
+     *  ELEMENT REFS                                                *
+     *****************************************************************/
+    const sidebar      = $('#sidebar');
+    const burger       = $('#burger');
+    const sessionList  = $('#sessionList');
+    const searchBar    = $('#searchBar');
+    const messagesEl   = $('#messages');
+    const composer     = $('#composer');
+    const promptEl     = $('#prompt');
+    const newChatBtn   = $('#newChatBtn');
+
+    /*****************************************************************
+     *  RENDER FUNCTIONS                                            *
+     *****************************************************************/
+    function renderSessionList(filter=''){
+      sessionList.innerHTML='';
+      const ids = Object.keys(conversations).sort((a,b)=>b-a); // newest first
+      ids.forEach(id=>{
+        const convo = conversations[id];
+        if(filter && !JSON.stringify(convo).toLowerCase().includes(filter.toLowerCase())) return;
+        const li=document.createElement('li');
+        li.className=id===sessionId?'active':'';
+        const preview = convo[0]?.user||'New chat';
+        li.innerHTML=`<div class="chat-preview">${preview.slice(0,40)}</div><div class="chat-date">${new Date(Number(id)).toLocaleString()}</div>`;
+        li.onclick=()=>{sessionId=id;localStorage.setItem('sessionId',sessionId);renderSessionList(searchBar.value);renderMessages();toggleSidebar(false);};
+        sessionList.appendChild(li);
+      });
+    }
+
+    function renderMessages(){
+      messagesEl.innerHTML='';
+      (conversations[sessionId]||[]).forEach(({user,bot,time})=>{
+        const userMsg=document.createElement('div');
+        userMsg.className='msg user';
+        userMsg.innerHTML=`${user}<span class="timestamp">${time}</span>`;
+        messagesEl.appendChild(userMsg);
+
+        const botMsg=document.createElement('div');
+        botMsg.className='msg bot';
+        botMsg.innerHTML=`${bot}<span class="timestamp">${time}</span>`;
+        messagesEl.appendChild(botMsg);
+      });
+      messagesEl.scrollTop=messagesEl.scrollHeight;
+    }
+
+    /*****************************************************************
+     *  INTERACTIONS                                               *
+     *****************************************************************/
+    function toggleSidebar(force){
+      if(typeof force==='boolean') sidebar.classList.toggle('hidden',!force);
+      else sidebar.classList.toggle('hidden');
+    }
+
+    burger.onclick=()=>toggleSidebar();
+    searchBar.oninput=()=>renderSessionList(searchBar.value);
+    newChatBtn.onclick=()=>{
+      sessionId=Date.now().toString();
+      conversations[sessionId]=[];
+      store.write('conversations',conversations);
+      localStorage.setItem('sessionId',sessionId);
+      renderSessionList();renderMessages();
+    };
+
+    composer.onsubmit=e=>{
+      e.preventDefault();
+      const prompt=promptEl.value.trim();
+      if(!prompt) return;
+      promptEl.value='';
+
+      const timestamp=formatTime(new Date());
+      // Push user message immediately
+      conversations[sessionId].push({user:prompt,bot:'',time:timestamp});
+      renderMessages();
+
+      // Typing indicator
+      const typing=document.createElement('div');
+      typing.className='msg bot typing';
+      typing.innerHTML='<span></span><span></span><span></span>';
+      messagesEl.appendChild(typing);
+      messagesEl.scrollTop=messagesEl.scrollHeight;
+
+      // Simulate async bot reply (replace with real API)
+      setTimeout(()=>{
+        const reply=`You asked: \"${prompt}\" — here is a futuristic answer about the organization.`;
+        // Remove typing indicator
+        typing.remove();
+        // Update conversation & UI
+        conversations[sessionId].pop(); // remove placeholder with empty bot
+        conversations[sessionId].push({user:prompt,bot:reply,time:timestamp});
+        store.write('conversations',conversations);
+        renderMessages();renderSessionList(searchBar.value);
+      },1000);
+    };
+
+    /*****************************************************************
+     *  INIT                                                        *
+     *****************************************************************/
+    renderSessionList();
+    renderMessages();
+  </script>
+</body>
+</html>
