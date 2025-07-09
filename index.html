@@ -152,9 +152,17 @@
   </main>
 
   <script>
-    setTimeout(() => {
-  window.location.href = 'auth.html';
-}, 1000);
+   if (!localStorage.getItem('visited')) {
+  localStorage.setItem('visited', 'yes');
+
+  // Optional: Show the popup
+  const loginPopup = document.getElementById('loginPopup');
+  if (loginPopup) loginPopup.style.display = 'block';
+
+  setTimeout(() => {
+    window.location.href = 'auth.html';
+  }, 1000);
+}
 
     /*****************************************************************
      *  UTILITIES                                                   *
