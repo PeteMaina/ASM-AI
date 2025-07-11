@@ -37,3 +37,27 @@ def ask_question():
         return jsonify({"answer": answer}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# routes.py
+
+from flask import Blueprint, request, jsonify
+from backend.ai_engine.chatbot import answer_question
+from backend.auth import authenticate_user
+
+api = Blueprint('api', __name__)
+
+@api.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    token = data.get("token")
+    question = data.get("question")
+
+    if not token or not question:
+        return jsonify({"error": "Missing token or question"}), 400
+
+    user_id = authenticate_user(token)
+    if not user_id:
+        return jsonify({"error": "Invalid token"}), 401
+
+    response = answer_question(user_id, question)
+    return jsonify({"response": response})
