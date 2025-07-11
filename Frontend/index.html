@@ -61,9 +61,32 @@
 }
 
     body{display:flex;overflow:hidden;}
+    body.sidebar-visible {
+  display: flex;
+}
+
+body.sidebar-visible .main {
+  width: calc(100% - 300px); /* shrink main panel */
+  transition: width 0.4s ease;
+}
+
+.main {
+  width: 100%;
+  transition: width 0.4s ease;
+}
+
 
     /* ---------- Sidebar (Conversation list) ---------- */
-    .sidebar{width:300px;max-width:80vw;background:var(--black);border-right:2px solid var(--red-soft);display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);z-index:5;box-shadow:var(--shadow-1);} 
+    .sidebar{
+      width:300px;
+      max-width:80vw;
+      background:var(--black);
+      border-right:2px solid var(--red-soft);
+      display:flex;flex-direction:column;
+      transition:transform .35s cubic-bezier(.4,0,.2,1);
+      z-index:100;box-shadow:var(--shadow-1);
+      position: relative;
+    } 
     .sidebar.hidden{transform:translateX(-100%);} /* off‑canvas state */
 
     .sidebar-header{display:flex;flex-direction:column;gap:.75rem;padding:1rem 1rem 0;}
@@ -163,6 +186,38 @@
     window.location.href = 'auth.html';
   }, 1000);
 }
+
+if (localStorage.getItem('justLoggedIn') === 'true') {
+  // Generate new session ID
+  sessionId = Date.now().toString();
+
+  // Ensure we preserve old sessions
+  conversations[sessionId] = [];
+
+  // Remove chats older than 5 days
+  const now = Date.now();
+  const cutoff = 5 * 24 * 60 * 60 * 1000; // 5 days in ms
+  for (const id in conversations) {
+    if (now - Number(id) > cutoff) {
+      delete conversations[id];
+    }
+  }
+
+  store.write('conversations', conversations);
+  localStorage.setItem('sessionId', sessionId);
+  localStorage.removeItem('justLoggedIn');
+
+  // Show empty chat with welcome prompt
+  messagesEl.innerHTML = `
+    <div class="msg bot">
+      What would you like to know today?
+    </div>
+  `;
+} else {
+  renderMessages(); // Default behavior
+}
+
+
 
     /*****************************************************************
      *  UTILITIES                                                   *
