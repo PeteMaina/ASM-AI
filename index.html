@@ -5,7 +5,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OrgBot • Dashboard</title>
+  <title>ASM AI</title>
+  <link rel="icon" href="img/AMREF.png" type="image/png">
   <style>
     /*****************************************************************
      *  ROOT TOKENS (Material 3 Expressive – 3‑color palette)        *
@@ -140,6 +141,30 @@ body.sidebar-visible .main {
   touch-action: pan-y; /* Allow vertical scroll, block horizontal */
 }
 
+@media(min-width: 769px){
+  .sidebar.hidden {
+    transform: none; /* Always visible on large screens */
+  }
+}
+
+@media(max-width: 768px) {
+  body {
+    overflow: auto;
+    flex-direction: column;
+  }
+}
+
+.hcont > div:last-child img {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 999;
+}
+
+
+
+
+
   </style>
 </head>
 <body>
@@ -159,10 +184,16 @@ body.sidebar-visible .main {
       <button class="burger" id="burger" aria-label="Toggle sidebar">
         <span></span><span></span><span></span>
       </button>
-      <div class="header">
-            <img src="img/AMREF.png" alt="amref" width="100" height="80">
-            <h1>ASM AI</h1>
-            <img src="img/ai-.png" alt="ai" width="40" height="40">
+      <div class="hcont">
+        <div class="header">
+              <img src="img/AMREF.png" alt="amref" width="120" height="80">
+              <h1>ASM AI</h1>
+              <img src="img/ai-.png" alt="ai" width="40" height="40">
+          </div>
+
+          <div>
+            <a href="auth.html"><img src="img/out.png" alt="amref" width="40" height="40"></a>
+          </div>
         </div>
     </header>
 
@@ -365,8 +396,14 @@ function handleSwipeGesture() {
   }
 }
 
-function toggleSidebar(show){
-  sidebar.classList.toggle('hidden', show === false);
+function toggleSidebar(force){
+  const isHidden = sidebar.classList.contains('hidden');
+  if (typeof force === 'boolean') {
+    if (force && isHidden) sidebar.classList.remove('hidden');
+    else if (!force && !isHidden) sidebar.classList.add('hidden');
+  } else {
+    sidebar.classList.toggle('hidden');
+  }
 }
 
 
